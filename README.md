@@ -51,7 +51,7 @@ TOP 5 MEMORY CONSUMERS:
   PID 3310      612.8 MB  python3
 
 QUICK ACTIONS:
-  Stop Docker      : docker stop $(docker ps -q) && osascript -e 'quit app "Docker Desktop"'
+  Stop Docker+EMR  : emr-down
   Flush DNS cache  : sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
   Memory overview  : top -o mem
   View log         : open ~/mac_health_log.txt
@@ -82,7 +82,7 @@ QUICK ACTIONS:
 ## Installation
 
 ```zsh
-git clone https://github.com/YOUR_USERNAME/mac-health-monitor.git
+git clone https://github.com/trossitter/mac-health-notification.git
 cd mac-health-monitor
 zsh install.sh
 ```
@@ -118,20 +118,25 @@ THRESH_FREE_RAM=999 zsh ~/scripts/mac_health.sh
 
 ## Configuration
 
-Thresholds are plain variables at the top of `mac_health.sh` — edit them before installing, or after:
+All thresholds and the log path are controlled via environment variables with sensible defaults — no need to edit the script. Override them at runtime or add them to your crontab:
+
+| Variable | Default | Description |
+|---|---|---|
+| `THRESH_LOAD` | `6` | 1-min load average ceiling |
+| `THRESH_FREE_RAM` | `4` | Free RAM floor in GB |
+| `THRESH_COMP` | `4` | VM compressor ceiling in GB |
+| `MAC_HEALTH_LOG` | `~/mac_health_log.txt` | Log file path |
+
+**One-off override:**
 
 ```zsh
-# Inside mac_health.sh
-THRESH_LOAD=6        # 1-min load average
-THRESH_FREE_RAM=4    # GB
-THRESH_COMP=4        # GB
-THRESH_SWAPOUTS=0    # any swap = alert
+THRESH_LOAD=3 THRESH_FREE_RAM=8 zsh ~/scripts/mac_health.sh
 ```
 
-The log path can be overridden at runtime via the `MAC_HEALTH_LOG` environment variable:
+**Persistent override via crontab** (`crontab -e`):
 
-```zsh
-MAC_HEALTH_LOG=/tmp/test.log zsh ~/scripts/mac_health.sh
+```
+*/30 * * * * THRESH_LOAD=3 THRESH_FREE_RAM=8 /bin/zsh ~/scripts/mac_health.sh
 ```
 
 ---
